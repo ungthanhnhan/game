@@ -3,97 +3,61 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mega Man Pixel Animation</title>
+  <title>Pixel Art Radahn</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background-color: #222;
-      color: #fff;
       margin: 0;
-      padding: 0;
+      background-color: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
 
     #pixel-art {
       display: grid;
-      grid-template-columns: repeat(16, 20px); /* 16 cột, mỗi pixel rộng 20px */
-      grid-gap: 1px;
-      margin: 20px auto;
+      grid-template-columns: repeat(50, 10px); /* Số cột và kích thước pixel */
+      grid-gap: 0;
     }
 
     .pixel {
-      width: 20px;
-      height: 20px;
-      background-color: transparent; /* Mặc định là trong suốt */
+      width: 10px;
+      height: 10px;
     }
   </style>
 </head>
 <body>
-  <h1>Mega Man Pixel Art Animation</h1>
   <div id="pixel-art"></div>
+
   <script>
-    // Các khung hình động cho Mega Man
-    const frames = [
-      [ // Khung hình 1
-        [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0],
-        [0, 0, 0, 1, 2, 3, 3, 2, 2, 3, 3, 2, 1, 0, 0, 0],
-        [0, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 2, 1, 0, 0],
-        [0, 0, 1, 2, 3, 4, 4, 3, 3, 4, 4, 3, 2, 1, 0, 0],
-        [0, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 2, 1, 0, 0],
-        [0, 0, 1, 1, 2, 3, 3, 3, 3, 3, 3, 2, 1, 1, 0, 0],
-        [0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0, 0, 0],
-        [0, 0, 0, 0, 1, 3, 3, 3, 3, 3, 3, 1, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 1, 1, 3, 3, 1, 1, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 1, 2, 2, 3, 3, 2, 2, 1, 0, 0, 0, 0],
-        [0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0, 0, 0],
-        [0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0, 0],
-        [0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0],
-        [0, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 0],
-        [0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0],
-      ],
-      [ // Khung hình 2 (cử động tay chân)
-        [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0],
-        [0, 0, 0, 1, 2, 3, 3, 2, 2, 3, 3, 2, 1, 0, 0, 0],
-        [0, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 2, 1, 0, 0],
-        [0, 0, 1, 2, 3, 4, 4, 3, 3, 4, 4, 3, 2, 1, 0, 0],
-        [0, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 2, 1, 0, 0],
-        [0, 0, 1, 1, 2, 3, 5, 5, 3, 5, 3, 2, 1, 1, 0, 0],
-        [0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0, 0, 0],
-      ],
+    // Ma trận pixel (cần thay thế bằng dữ liệu thực)
+    const pixelData = [
+      [0, 1, 2, 3, 4, 5],
+      [5, 4, 3, 2, 1, 0],
+      // ...
     ];
 
+    // Bảng màu (thay bằng bảng màu thực từ ảnh)
     const colors = [
-      "transparent", // 0: Trong suốt
-      "#1E90FF",     // 1: Xanh
-      "#FFFF",       //
+      "#000000", // Màu đen
+      "#FF0000", // Màu đỏ
+      "#00FF00", // Màu xanh lá
+      "#0000FF", // Màu xanh dương
+      "#FFFF00", // Màu vàng
+      "#FFFFFF", // Màu trắng
     ];
-    const container =    document.getElementById("pixel-art");
 
-    // Hàm để hiển thị một khung hình
-    function renderFrame(frame) {
-      container.innerHTML = ""; // Xóa nội dung trước
-      frame.forEach(row => {
-        row.forEach(pixel => {
-          const div = document.createElement("div");
-          div.className = "pixel";
-          div.style.backgroundColor = colors[pixel];
-          container.appendChild(div);
-        });
+    const container = document.getElementById("pixel-art");
+
+    // Tạo pixel từ dữ liệu
+    pixelData.forEach(row => {
+      row.forEach(pixel => {
+        const div = document.createElement("div");
+        div.className = "pixel";
+        div.style.backgroundColor = colors[pixel];
+        container.appendChild(div);
       });
-    }
-
-    // Chuyển đổi giữa các khung hình
-    let currentFrame = 0;
-    function animate() {
-      renderFrame(frames[currentFrame]);
-      currentFrame = (currentFrame + 1) % frames.length; // Lặp lại giữa các khung
-      setTimeout(animate, 500); // Chuyển đổi mỗi 500ms
-    }
-
-    // Bắt đầu hoạt ảnh
-    animate();
+    });
   </script>
 </body>
 </html>
