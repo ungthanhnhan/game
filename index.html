@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rockman X4 Pixel Art</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #222;
+      color: #fff;
+    }
+
+    #pixel-art {
+      display: grid;
+      grid-template-columns: repeat(30, 10px); /* 30 cột, mỗi pixel rộng 10px */
+      grid-gap: 1px;
+      margin: 20px auto;
+      width: fit-content;
+    }
+
+    .pixel {
+      width: 10px;
+      height: 10px;
+      background-color: #000; /* Màu mặc định */
+    }
+  </style>
+</head>
+<body>
+  <h1>Rockman X4 Pixel Art</h1>
+  <div id="pixel-art"></div>
+  <script>
+    // Dữ liệu màu sắc (mỗi số tương ứng một màu)
+    const pixelData = [
+      [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], // Ví dụ hàng đầu tiên
+      [0, 0, 1, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0],
+      [0, 1, 2, 3, 3, 2, 1, 0, 0, 0, 0, 0, 0],
+      // Thêm các hàng khác để hoàn thiện nhân vật Rockman X4
+    ];
+
+    const colors = [
+      "#000000", // Màu đen (0)
+      "#1E90FF", // Màu xanh dương (1)
+      "#FFD700", // Màu vàng (2)
+      "#FF4500", // Màu đỏ (3)
+      "#FFFFFF", // Màu trắng (4)
+    ];
+
+    const container = document.getElementById("pixel-art");
+
+    // Tạo pixel theo dữ liệu
+    pixelData.forEach(row => {
+      row.forEach(pixel => {
+        const div = document.createElement("div");
+        div.className = "pixel";
+        div.style.backgroundColor = colors[pixel];
+        container.appendChild(div);
+      });
+    });
+  </script>
+</body>
+</html>
