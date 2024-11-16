@@ -3,61 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pixel Art Radahn</title>
+  <title>Pixel Art - Radahn Festival</title>
   <style>
     body {
       margin: 0;
-      background-color: #000;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      background-color: black;
     }
-
-    #pixel-art {
-      display: grid;
-      grid-template-columns: repeat(50, 10px); /* Số cột và kích thước pixel */
-      grid-gap: 0;
-    }
-
-    .pixel {
-      width: 10px;
-      height: 10px;
+    canvas {
+      image-rendering: pixelated; /* Giữ độ sắc nét của pixel */
+      image-rendering: crisp-edges;
     }
   </style>
 </head>
 <body>
-  <div id="pixel-art"></div>
-
+  <canvas id="pixelCanvas"></canvas>
   <script>
-    // Ma trận pixel (cần thay thế bằng dữ liệu thực)
-    const pixelData = [
-      [0, 1, 2, 3, 4, 5],
-      [5, 4, 3, 2, 1, 0],
-      // ...
+    // Kích thước canvas
+    const canvas = document.getElementById("pixelCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Đặt kích thước canvas
+    const canvasWidth = 512; // Chiều rộng (pixel gốc)
+    const canvasHeight = 256; // Chiều cao (pixel gốc)
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+
+    // Dữ liệu hình ảnh pixel (thay thế bằng dữ liệu ảnh của bạn)
+    const imageData = [
+      // Dữ liệu pixel dạng ma trận [r, g, b, a, r, g, b, a, ...]
+      // Bạn sẽ cần tự động tạo hoặc chuyển đổi từ ảnh gốc.
     ];
 
-    // Bảng màu (thay bằng bảng màu thực từ ảnh)
-    const colors = [
-      "#000000", // Màu đen
-      "#FF0000", // Màu đỏ
-      "#00FF00", // Màu xanh lá
-      "#0000FF", // Màu xanh dương
-      "#FFFF00", // Màu vàng
-      "#FFFFFF", // Màu trắng
-    ];
+    // Chuyển đổi dữ liệu pixel lên canvas
+    const imgData = ctx.createImageData(canvasWidth, canvasHeight);
+    for (let i = 0; i < imageData.length; i++) {
+      imgData.data[i] = imageData[i]; // Sao chép từng pixel
+    }
+    ctx.putImageData(imgData, 0, 0);
 
-    const container = document.getElementById("pixel-art");
-
-    // Tạo pixel từ dữ liệu
-    pixelData.forEach(row => {
-      row.forEach(pixel => {
-        const div = document.createElement("div");
-        div.className = "pixel";
-        div.style.backgroundColor = colors[pixel];
-        container.appendChild(div);
-      });
-    });
+    // Nếu không có dữ liệu, chỉ hiển thị nền trống
+    ctx.fillStyle = "red"; // Thay bằng màu gốc của ảnh
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
   </script>
 </body>
 </html>
