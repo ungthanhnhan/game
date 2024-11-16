@@ -69,5 +69,31 @@
       "#1E90FF",     // 1: Xanh
       "#FFFF",       //
     ];
-    const container =
-      
+    const container =    document.getElementById("pixel-art");
+
+    // Hàm để hiển thị một khung hình
+    function renderFrame(frame) {
+      container.innerHTML = ""; // Xóa nội dung trước
+      frame.forEach(row => {
+        row.forEach(pixel => {
+          const div = document.createElement("div");
+          div.className = "pixel";
+          div.style.backgroundColor = colors[pixel];
+          container.appendChild(div);
+        });
+      });
+    }
+
+    // Chuyển đổi giữa các khung hình
+    let currentFrame = 0;
+    function animate() {
+      renderFrame(frames[currentFrame]);
+      currentFrame = (currentFrame + 1) % frames.length; // Lặp lại giữa các khung
+      setTimeout(animate, 500); // Chuyển đổi mỗi 500ms
+    }
+
+    // Bắt đầu hoạt ảnh
+    animate();
+  </script>
+</body>
+</html>
