@@ -1,4 +1,13 @@
 from PIL import Image
+const imageData = {
+  width: 512,  // Chiều rộng ảnh
+  height: 256, // Chiều cao ảnh
+  pixels: [
+    [255, 0, 0, 255, 0, 255, 0, 255, ...], // Pixel dòng 1
+    [0, 0, 255, 255, 255, 255, 255, 255, ...], // Pixel dòng 2
+    ...
+  ]
+};
 
 # Đường dẫn tới file ảnh gốc
 image_path = "/mnt/data/pixel-art-radahn-festival-v0-7vrfqq7baf491.png"
