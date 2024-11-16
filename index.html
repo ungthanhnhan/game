@@ -3,51 +3,47 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pixel Art - Radahn Festival</title>
+  <title>Pixel Art Radahn Festival</title>
   <style>
     body {
       margin: 0;
+      background-color: black;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background-color: black;
     }
     canvas {
-      image-rendering: pixelated; /* Giữ độ sắc nét của pixel */
+      image-rendering: pixelated; /* Giữ nguyên độ sắc nét pixel */
       image-rendering: crisp-edges;
     }
   </style>
 </head>
 <body>
   <canvas id="pixelCanvas"></canvas>
+  <script src="pixel_data.js"></script> <!-- Dữ liệu pixel từ file JS -->
   <script>
-    // Kích thước canvas
+    // Lấy canvas và ngữ cảnh
     const canvas = document.getElementById("pixelCanvas");
     const ctx = canvas.getContext("2d");
 
-    // Đặt kích thước canvas
-    const canvasWidth = 512; // Chiều rộng (pixel gốc)
-    const canvasHeight = 256; // Chiều cao (pixel gốc)
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
+    // Kích thước canvas
+    canvas.width = imageData.width;
+    canvas.height = imageData.height;
 
-    // Dữ liệu hình ảnh pixel (thay thế bằng dữ liệu ảnh của bạn)
-    const imageData = [
-      // Dữ liệu pixel dạng ma trận [r, g, b, a, r, g, b, a, ...]
-      // Bạn sẽ cần tự động tạo hoặc chuyển đổi từ ảnh gốc.
-    ];
+    // Tạo ảnh từ dữ liệu pixel
+    const imgData = ctx.createImageData(imageData.width, imageData.height);
+    const pixels = imageData.pixels.flat(); // Dữ liệu pixel dạng phẳng
 
-    // Chuyển đổi dữ liệu pixel lên canvas
-    const imgData = ctx.createImageData(canvasWidth, canvasHeight);
-    for (let i = 0; i < imageData.length; i++) {
-      imgData.data[i] = imageData[i]; // Sao chép từng pixel
+    for (let i = 0; i < pixels.length; i++) {
+      imgData.data[i * 4] = pixels[i][0];     // R
+      imgData.data[i * 4 + 1] = pixels[i][1]; // G
+      imgData.data[i * 4 + 2] = pixels[i][2]; // B
+      imgData.data[i * 4 + 3] = pixels[i][3]; // A
     }
-    ctx.putImageData(imgData, 0, 0);
 
-    // Nếu không có dữ liệu, chỉ hiển thị nền trống
-    ctx.fillStyle = "red"; // Thay bằng màu gốc của ảnh
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    // Vẽ ảnh lên canvas
+    ctx.putImageData(imgData, 0, 0);
   </script>
 </body>
 </html>
