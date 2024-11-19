@@ -41,9 +41,9 @@
             height: 150px;
             background-color: rgba(0, 0, 0, 0.1);
             border-radius: 50%;
-            display: none;
             touch-action: none;
             z-index: 10;
+            display: none;
         }
         #joystick {
             position: absolute;
@@ -76,40 +76,9 @@
         const joystickContainer = document.getElementById('joystick-container');
         const joystick = document.getElementById('joystick');
         const squareSpeed = 5;
-        const keys = { w: false, a: false, s: false, d: false };
         let squarePos = { x: gameContainer.clientWidth / 2 - square.offsetWidth / 2, y: gameContainer.clientHeight / 2 - square.offsetHeight / 2 };
         let joystickActive = false;
         let joystickStart = { x: 0, y: 0 };
-
-        // Di chuyển khối vuông trên máy tính
-        function updateSquare() {
-            let dx = 0, dy = 0;
-            if (keys.w && !keys.s) dy -= 1;
-            if (keys.s && !keys.w) dy += 1;
-            if (keys.a && !keys.d) dx -= 1;
-            if (keys.d && !keys.a) dx += 1;
-            const length = Math.sqrt(dx * dx + dy * dy);
-            if (length > 0) {
-                dx /= length;
-                dy /= length;
-            }
-            squarePos.x += dx * squareSpeed;
-            squarePos.y += dy * squareSpeed;
-            squarePos.x = Math.max(0, Math.min(gameContainer.clientWidth - square.offsetWidth, squarePos.x));
-            squarePos.y = Math.max(0, Math.min(gameContainer.clientHeight - square.offsetHeight, squarePos.y));
-            square.style.left = `${squarePos.x}px`;
-            square.style.top = `${squarePos.y}px`;
-        }
-
-        setInterval(updateSquare, 16);
-
-        document.addEventListener('keydown', (e) => {
-            if (keys[e.key.toLowerCase()] !== undefined) keys[e.key.toLowerCase()] = true;
-        });
-
-        document.addEventListener('keyup', (e) => {
-            if (keys[e.key.toLowerCase()] !== undefined) keys[e.key.toLowerCase()] = false;
-        });
 
         // Di chuyển khối vuông và hiệu ứng joystick trên điện thoại
         joystickContainer.addEventListener('touchstart', (e) => {
