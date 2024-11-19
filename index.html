@@ -41,6 +41,7 @@
             height: 150px;
             background-color: rgba(0, 0, 0, 0.1);
             border-radius: 50%;
+            display: none;
             touch-action: none;
             z-index: 10;
         }
@@ -53,6 +54,7 @@
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
+            transition: left 0.05s, top 0.05s;
         }
         @media (hover: none) and (pointer: coarse) {
             #joystick-container {
@@ -74,11 +76,23 @@
         const joystickContainer = document.getElementById('joystick-container');
         const joystick = document.getElementById('joystick');
         const squareSpeed = 5;
+        const keys = { w: false, a: false, s: false, d: false };
         let squarePos = { x: gameContainer.clientWidth / 2 - square.offsetWidth / 2, y: gameContainer.clientHeight / 2 - square.offsetHeight / 2 };
         let joystickActive = false;
         let joystickStart = { x: 0, y: 0 };
 
-        function updateSquarePosition(dx, dy) {
+        // Di chuyển khối vuông trên máy tính
+        function updateSquare() {
+            let dx = 0, dy = 0;
+            if (keys.w && !keys.s) dy -= 1;
+            if (keys.s && !keys.w) dy += 1;
+            if (keys.a && !keys.d) dx -= 1;
+            if (keys.d && !keys.a) dx += 1;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            if (length > 0) {
+                dx /= length;
+                dy /= length;
+            }
             squarePos.x += dx * squareSpeed;
             squarePos.y += dy * squareSpeed;
             squarePos.x = Math.max(0, Math.min(gameContainer.clientWidth - square.offsetWidth, squarePos.x));
@@ -87,18 +101,28 @@
             square.style.top = `${squarePos.y}px`;
         }
 
+        setInterval(updateSquare, 16);
+
+        document.addEventListener('keydown', (e) => {
+            if (keys[e.key.toLowerCase()] !== undefined) keys[e.key.toLowerCase()] = true;
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (keys[e.key.toLowerCase()] !== undefined) keys[e.key.toLowerCase()] = false;
+        });
+
+        // Di chuyển khối vuông và hiệu ứng joystick trên điện thoại
         joystickContainer.addEventListener('touchstart', (e) => {
             joystickActive = true;
             joystickStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-            joystick.style.left = `${joystickStart.x - joystickContainer.offsetLeft - joystick.offsetWidth / 2}px`;
-            joystick.style.top = `${joystickStart.y - joystickContainer.offsetTop - joystick.offsetHeight / 2}px`;
+            joystick.style.transition = 'none';
         });
 
         joystickContainer.addEventListener('touchmove', (e) => {
             if (!joystickActive) return;
             const rect = joystickContainer.getBoundingClientRect();
-            const dx = e.touches[0].clientX - joystickStart.x;
-            const dy = e.touches[0].clientY - joystickStart.y;
+            const dx = e.touches[0].clientX - rect.left - rect.width / 2;
+            const dy = e.touches[0].clientY - rect.top - rect.height / 2;
             const distance = Math.min(Math.sqrt(dx * dx + dy * dy), rect.width / 2 - joystick.offsetWidth / 2);
             const angle = Math.atan2(dy, dx);
             const offsetX = Math.cos(angle) * distance;
@@ -108,14 +132,19 @@
 
             const normalizedDX = offsetX / distance || 0;
             const normalizedDY = offsetY / distance || 0;
-            updateSquarePosition(normalizedDX, normalizedDY);
+            squarePos.x += normalizedDX * squareSpeed;
+            squarePos.y += normalizedDY * squareSpeed;
+            squarePos.x = Math.max(0, Math.min(gameContainer.clientWidth - square.offsetWidth, squarePos.x));
+            squarePos.y = Math.max(0, Math.min(gameContainer.clientHeight - square.offsetHeight, squarePos.y));
+            square.style.left = `${squarePos.x}px`;
+            square.style.top = `${squarePos.y}px`;
         });
 
         joystickContainer.addEventListener('touchend', () => {
             joystickActive = false;
+            joystick.style.transition = 'left 0.1s, top 0.1s';
             joystick.style.left = '50%';
             joystick.style.top = '50%';
-            joystick.style.transform = 'translate(-50%, -50%)';
         });
     </script>
 </body>
