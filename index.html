@@ -31,6 +31,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            transition: transform 0.1s linear;
         }
         #joystick-container {
             position: absolute;
@@ -41,7 +42,7 @@
             height: 150px;
             background-color: rgba(0, 0, 0, 0.1);
             border-radius: 50%;
-            display: flex;
+            display: none;
             justify-content: center;
             align-items: center;
             touch-action: none;
@@ -52,6 +53,11 @@
             background-color: gray;
             border-radius: 50%;
             position: relative;
+        }
+        @media (hover: none) and (pointer: coarse) {
+            #joystick-container {
+                display: flex;
+            }
         }
     </style>
 </head>
@@ -69,6 +75,8 @@
         const joystick = document.getElementById('joystick');
         let squarePos = { x: gameContainer.offsetWidth / 2 - 25, y: gameContainer.offsetHeight / 2 - 25 };
         const step = 10;
+        let joystickActive = false;
+        let joystickStart = { x: 0, y: 0 };
 
         function moveSquare(dx, dy) {
             squarePos.x = Math.min(
@@ -79,43 +87,39 @@
                 Math.max(0, squarePos.y + dy),
                 gameContainer.offsetHeight - square.offsetHeight
             );
-            square.style.left = squarePos.x + 'px';
-            square.style.top = squarePos.y + 'px';
+            square.style.transform = `translate(${squarePos.x}px, ${squarePos.y}px)`;
         }
 
         document.addEventListener('keydown', (e) => {
+            if (e.repeat) return;
             if (e.key === 'w') moveSquare(0, -step);
             if (e.key === 'a') moveSquare(-step, 0);
             if (e.key === 's') moveSquare(0, step);
             if (e.key === 'd') moveSquare(step, 0);
         });
 
-        let joystickActive = false;
-        let joystickStart = { x: 0, y: 0 };
-
-        joystick.addEventListener('touchstart', (e) => {
+        joystickContainer.addEventListener('touchstart', (e) => {
             joystickActive = true;
             joystickStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
         });
 
-        joystick.addEventListener('touchmove', (e) => {
+        joystickContainer.addEventListener('touchmove', (e) => {
             if (!joystickActive) return;
             const dx = e.touches[0].clientX - joystickStart.x;
             const dy = e.touches[0].clientY - joystickStart.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
+            const distance = Math.min(Math.sqrt(dx * dx + dy * dy), joystickContainer.offsetWidth / 2 - joystick.offsetWidth / 2);
+            const angle = Math.atan2(dy, dx);
+            const offsetX = Math.cos(angle) * distance;
+            const offsetY = Math.sin(angle) * distance;
+            joystick.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
             if (distance > 10) {
-                const angle = Math.atan2(dy, dx);
-                if (Math.abs(dx) > Math.abs(dy)) {
-                    moveSquare(dx > 0 ? step : -step, 0);
-                } else {
-                    moveSquare(0, dy > 0 ? step : -step);
-                }
-                joystickStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                moveSquare(Math.cos(angle) * step, Math.sin(angle) * step);
             }
         });
 
-        joystick.addEventListener('touchend', () => {
+        joystickContainer.addEventListener('touchend', () => {
             joystickActive = false;
+            joystick.style.transform = 'translate(0, 0)';
         });
     </script>
 </body>
