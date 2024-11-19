@@ -66,10 +66,10 @@
             return {
                 x: Math.random() * canvas.width,
                 y: Math.random() * canvas.height,
-                radius: Math.random() * 3 + 1, // Ngẫu nhiên kích thước
+                radius: Math.random() * 3 + 1,
                 speed: Math.random() * 0.5 + 0.2,
-                opacity: Math.random() * 0.5 + 0.5, // Độ sáng ngẫu nhiên
-                glowIntensity: Math.random() * 3 + 2, // Cường độ phát sáng
+                opacity: Math.random() * 0.5 + 0.5,
+                glowIntensity: Math.random() * 3 + 2,
             };
         }
 
@@ -82,28 +82,28 @@
 
             stars.forEach((star) => {
                 const gradient = ctx.createRadialGradient(
-                    star.x, star.y, 0, 
+                    star.x, star.y, 0,
                     star.x, star.y, star.radius * star.glowIntensity
                 );
                 gradient.addColorStop(0, `rgba(255, 255, 255, ${star.opacity})`);
                 gradient.addColorStop(0.4, `rgba(255, 255, 255, ${star.opacity / 2})`);
                 gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
 
+                // Vẽ phát sáng trung tâm
                 ctx.beginPath();
                 ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
                 ctx.fillStyle = gradient;
                 ctx.fill();
 
-                // Hiệu ứng tỏa sáng như tia
+                // Hiệu ứng tỏa sáng ổn định
                 ctx.save();
                 ctx.translate(star.x, star.y);
-                ctx.rotate((Math.random() - 0.5) * 0.2); // Xoay nhẹ các tia
                 ctx.strokeStyle = `rgba(255, 255, 255, ${star.opacity / 3})`;
-                ctx.lineWidth = star.radius / 2;
+                ctx.lineWidth = star.radius / 3;
                 for (let i = 0; i < 4; i++) {
                     ctx.beginPath();
                     ctx.moveTo(0, 0);
-                    ctx.lineTo(0, star.radius * star.glowIntensity * 2);
+                    ctx.lineTo(0, star.radius * star.glowIntensity * 1.5);
                     ctx.stroke();
                     ctx.rotate(Math.PI / 2);
                 }
