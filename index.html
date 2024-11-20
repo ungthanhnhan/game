@@ -66,7 +66,6 @@
         <div id="joystick"></div>
     </div>
     <script>
-        // Canvas Setup for Background
         const canvas = document.getElementById("background");
         const ctx = canvas.getContext("2d");
         const stars = [];
@@ -96,23 +95,16 @@
         function drawBackground() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Add Brightness Areas
-            const brightnessPositions = [
-                { x: canvas.width / 4, y: canvas.height / 4, radius: 100 },
-                { x: canvas.width / 1.5, y: canvas.height / 2, radius: 150 },
-            ];
-
-            brightnessPositions.forEach((area) => {
-                const gradient = ctx.createRadialGradient(
-                    area.x, area.y, 0, area.x, area.y, area.radius
-                );
-                gradient.addColorStop(0, "rgba(255, 255, 255, 0.2)");
-                gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
-                ctx.fillStyle = gradient;
-                ctx.beginPath();
-                ctx.arc(area.x, area.y, area.radius, 0, Math.PI * 2);
-                ctx.fill();
-            });
+            // Draw Glow Beam
+            const gradient = ctx.createLinearGradient(canvas.width, 0, 0, canvas.height);
+            gradient.addColorStop(0, "rgba(255, 255, 255, 0)");
+            gradient.addColorStop(0.3, "rgba(255, 255, 255, 0.1)");
+            gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.3)");
+            gradient.addColorStop(0.7, "rgba(255, 255, 255, 0.1)");
+            gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+            ctx.fillStyle = gradient;
+            ctx.globalCompositeOperation = "lighter";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             // Draw Stars
             stars.forEach((star) => {
@@ -171,8 +163,8 @@
             joystick.style.left = `${75 + offsetX - 25}px`;
             joystick.style.top = `${75 + offsetY - 25}px`;
 
-            squarePos.x += offsetX / 15;
-            squarePos.y += offsetY / 15;
+            squarePos.x = Math.max(0, Math.min(window.innerWidth, squarePos.x + offsetX / 10));
+            squarePos.y = Math.max(0, Math.min(window.innerHeight, squarePos.y + offsetY / 10));
             square.style.left = `${squarePos.x}px`;
             square.style.top = `${squarePos.y}px`;
         });
