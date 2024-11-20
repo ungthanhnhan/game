@@ -69,6 +69,7 @@
         const canvas = document.getElementById("background");
         const ctx = canvas.getContext("2d");
         const stars = [];
+        const glowingStars = [];
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
@@ -78,6 +79,7 @@
         resizeCanvas();
         window.addEventListener("resize", resizeCanvas);
 
+        // Create small stars
         function createStar() {
             return {
                 x: Math.random() * canvas.width,
@@ -88,25 +90,28 @@
             };
         }
 
+        // Create glowing stars
+        function createGlowingStar() {
+            return {
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 3 + 2,
+                opacity: Math.random() * 0.5 + 0.5,
+            };
+        }
+
         for (let i = 0; i < 200; i++) {
             stars.push(createStar());
+        }
+
+        for (let i = 0; i < 10; i++) {
+            glowingStars.push(createGlowingStar());
         }
 
         function drawBackground() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw Glow Beam
-            const gradient = ctx.createLinearGradient(canvas.width, 0, 0, canvas.height);
-            gradient.addColorStop(0, "rgba(255, 255, 255, 0)");
-            gradient.addColorStop(0.3, "rgba(255, 255, 255, 0.1)");
-            gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.3)");
-            gradient.addColorStop(0.7, "rgba(255, 255, 255, 0.1)");
-            gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
-            ctx.fillStyle = gradient;
-            ctx.globalCompositeOperation = "lighter";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Draw Stars
+            // Draw small stars
             stars.forEach((star) => {
                 ctx.beginPath();
                 ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
@@ -117,6 +122,26 @@
                     star.y = 0;
                     star.x = Math.random() * canvas.width;
                 }
+            });
+
+            // Draw glowing stars
+            glowingStars.forEach((star) => {
+                const gradient = ctx.createRadialGradient(
+                    star.x,
+                    star.y,
+                    0,
+                    star.x,
+                    star.y,
+                    star.radius * 4
+                );
+                gradient.addColorStop(0, `rgba(255, 255, 255, ${star.opacity})`);
+                gradient.addColorStop(0.5, `rgba(255, 255, 255, ${star.opacity / 2})`);
+                gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
             });
         }
 
@@ -163,8 +188,8 @@
             joystick.style.left = `${75 + offsetX - 25}px`;
             joystick.style.top = `${75 + offsetY - 25}px`;
 
-            squarePos.x = Math.max(0, Math.min(window.innerWidth, squarePos.x + offsetX / 10));
-            squarePos.y = Math.max(0, Math.min(window.innerHeight, squarePos.y + offsetY / 10));
+            squarePos.x = Math.max(0, Math.min(window.innerWidth - square.offsetWidth, squarePos.x + offsetX / 10));
+            squarePos.y = Math.max(0, Math.min(window.innerHeight - square.offsetHeight, squarePos.y + offsetY / 10));
             square.style.left = `${squarePos.x}px`;
             square.style.top = `${squarePos.y}px`;
         });
