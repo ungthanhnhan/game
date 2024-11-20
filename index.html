@@ -25,6 +25,19 @@
             z-index: -1;
         }
 
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 100vw;
+            max-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            aspect-ratio: 16 / 9; /* Default for desktop */
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
         #square {
             position: absolute;
             width: 50px;
@@ -57,13 +70,21 @@
             border-radius: 50%;
             position: relative;
         }
+
+        @media (orientation: portrait) {
+            #game-container {
+                aspect-ratio: 9 / 19.5; /* For mobile */
+            }
+        }
     </style>
 </head>
 <body>
     <canvas id="background"></canvas>
-    <div id="square"></div>
-    <div id="joystick-container">
-        <div id="joystick"></div>
+    <div id="game-container">
+        <div id="square"></div>
+        <div id="joystick-container">
+            <div id="joystick"></div>
+        </div>
     </div>
     <script>
         const canvas = document.getElementById("background");
@@ -79,7 +100,6 @@
         resizeCanvas();
         window.addEventListener("resize", resizeCanvas);
 
-        // Create small stars
         function createStar() {
             return {
                 x: Math.random() * canvas.width,
@@ -90,7 +110,6 @@
             };
         }
 
-        // Create glowing stars
         function createGlowingStar() {
             return {
                 x: Math.random() * canvas.width,
@@ -111,7 +130,7 @@
         function drawBackground() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw small stars
+            // Draw stars
             stars.forEach((star) => {
                 ctx.beginPath();
                 ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
@@ -152,7 +171,7 @@
 
         animateBackground();
 
-        // Joystick Setup
+        // Joystick setup
         const square = document.getElementById("square");
         const joystickContainer = document.getElementById("joystick-container");
         const joystick = document.getElementById("joystick");
