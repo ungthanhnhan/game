@@ -3,73 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Joystick Test</title>
+    <title>Mini Game</title>
     <style>
         body {
             margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             height: 100vh;
+            background-color: #f0f0f0;
             overflow: hidden;
-            background: #8a2be2;
         }
-
         #game-container {
             position: relative;
             width: 100%;
+            max-width: 800px;
             height: 100%;
-            background: #fff;
+            max-height: 450px;
+            background-color: white;
+            border: 2px solid #000;
         }
-
+        #square {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background-color: red;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
         #joystick-container {
-            display: none;
             position: absolute;
             bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
             width: 150px;
             height: 150px;
-            background: rgba(0, 0, 0, 0.1);
+            background-color: rgba(0, 0, 0, 0.1);
             border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             touch-action: none;
         }
-
         #joystick {
-            position: absolute;
             width: 50px;
             height: 50px;
-            background: gray;
+            background-color: gray;
             border-radius: 50%;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-        }
-
-        @media (hover: none) and (pointer: coarse) {
-            #joystick-container {
-                display: block !important;
-            }
+            position: relative;
         }
     </style>
 </head>
 <body>
     <div id="game-container">
+        <div id="square"></div>
         <div id="joystick-container">
             <div id="joystick"></div>
         </div>
     </div>
     <script>
-        const joystickContainer = document.getElementById("joystick-container");
-        const joystick = document.getElementById("joystick");
+        const square = document.getElementById('square');
+        const gameContainer = document.getElementById('game-container');
+        const joystickContainer = document.getElementById('joystick-container');
+        const joystick = document.getElementById('joystick');
+        let squarePos = { x: gameContainer.offsetWidth / 2 - 25, y: gameContainer.offsetHeight / 2 - 25 };
+        const step = 10;
 
-        joystickContainer.addEventListener("touchstart", (e) => {
-            console.log("Joystick touched!");
+        function moveSquare(dx, dy) {
+            squarePos.x = Math.min(
+                Math.max(0, squarePos.x + dx),
+                gameContainer.offsetWidth - square.offsetWidth
+            );
+            squarePos.y = Math.min(
+                Math.max(0, squarePos.y + dy),
+                gameContainer.offsetHeight - square.offsetHeight
+            );
+            square.style.left = squarePos.x + 'px';
+            square.style.top = squarePos.y + 'px';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'w') moveSquare(0, -step);
+            if (e.key === 'a') moveSquare(-step, 0);
+            if (e.key === 's') moveSquare(0, step);
+            if (e.key === 'd') moveSquare(step, 0);
         });
 
-        joystickContainer.addEventListener("touchmove", (e) => {
-            console.log("Joystick moved!");
+        let joystickActive = false;
+        let joystickStart = { x: 0, y: 0 };
+
+        joystick.addEventListener('touchstart', (e) => {
+            joystickActive = true;
+            joystickStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
         });
 
-        joystickContainer.addEventListener("touchend", (e) => {
-            console.log("Joystick released!");
+        joystick.addEventListener('touchmove', (e) => {
+            if (!joystickActive) return;
+            const dx = e.touches[0].clientX - joystickStart.x;
+            const dy = e.touches[0].clientY - joystickStart.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance > 10) {
+                const angle = Math.atan2(dy, dx);
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    moveSquare(dx > 0 ? step : -step, 0);
+                } else {
+                    moveSquare(0, dy > 0 ? step : -step);
+                }
+                joystickStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            }
+        });
+
+        joystick.addEventListener('touchend', () => {
+            joystickActive = false;
         });
     </script>
 </body>
