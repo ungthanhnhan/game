@@ -65,13 +65,12 @@
     <div id="joystick-container">
         <div id="joystick"></div>
     </div>
-
     <script>
+        // Canvas Setup for Background
         const canvas = document.getElementById("background");
         const ctx = canvas.getContext("2d");
         const stars = [];
 
-        // Resize canvas
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -80,7 +79,6 @@
         resizeCanvas();
         window.addEventListener("resize", resizeCanvas);
 
-        // Create stars
         function createStar() {
             return {
                 x: Math.random() * canvas.width,
@@ -95,23 +93,28 @@
             stars.push(createStar());
         }
 
-        // Draw stars
         function drawBackground() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Gradient effect (brightness)
-            const gradient = ctx.createRadialGradient(
-                canvas.width / 2, canvas.height / 2, 100,
-                canvas.width / 2, canvas.height / 2, 500
-            );
-            gradient.addColorStop(0, "rgba(255, 255, 255, 0.1)");
-            gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.4)");
-            gradient.addColorStop(1, "rgba(255, 255, 255, 0.1)");
+            // Add Brightness Areas
+            const brightnessPositions = [
+                { x: canvas.width / 4, y: canvas.height / 4, radius: 100 },
+                { x: canvas.width / 1.5, y: canvas.height / 2, radius: 150 },
+            ];
 
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            brightnessPositions.forEach((area) => {
+                const gradient = ctx.createRadialGradient(
+                    area.x, area.y, 0, area.x, area.y, area.radius
+                );
+                gradient.addColorStop(0, "rgba(255, 255, 255, 0.2)");
+                gradient.addColorStop(1, "rgba(0, 0, 0, 0)");
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(area.x, area.y, area.radius, 0, Math.PI * 2);
+                ctx.fill();
+            });
 
-            // Draw stars with updated opacity
+            // Draw Stars
             stars.forEach((star) => {
                 ctx.beginPath();
                 ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
@@ -132,7 +135,7 @@
 
         animateBackground();
 
-        // Joystick control
+        // Joystick Setup
         const square = document.getElementById("square");
         const joystickContainer = document.getElementById("joystick-container");
         const joystick = document.getElementById("joystick");
@@ -145,13 +148,19 @@
             joystickActive = true;
             joystickStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
             joystick.style.transition = "none";
+
+            // Move joystick center to touch position
+            const rect = joystickContainer.getBoundingClientRect();
+            joystick.style.left = `${e.touches[0].clientX - rect.left - 25}px`;
+            joystick.style.top = `${e.touches[0].clientY - rect.top - 25}px`;
         });
 
         joystickContainer.addEventListener("touchmove", (e) => {
             if (!joystickActive) return;
 
-            const dx = e.touches[0].clientX - joystickStart.x;
-            const dy = e.touches[0].clientY - joystickStart.y;
+            const rect = joystickContainer.getBoundingClientRect();
+            const dx = e.touches[0].clientX - rect.left - 75;
+            const dy = e.touches[0].clientY - rect.top - 75;
 
             const distance = Math.min(Math.sqrt(dx * dx + dy * dy), 75);
             const angle = Math.atan2(dy, dx);
@@ -162,12 +171,10 @@
             joystick.style.left = `${75 + offsetX - 25}px`;
             joystick.style.top = `${75 + offsetY - 25}px`;
 
-            squarePos.x += offsetX / 10;
-            squarePos.y += offsetY / 10;
+            squarePos.x += offsetX / 15;
+            squarePos.y += offsetY / 15;
             square.style.left = `${squarePos.x}px`;
             square.style.top = `${squarePos.y}px`;
-
-            joystickStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
         });
 
         joystickContainer.addEventListener("touchend", () => {
