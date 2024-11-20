@@ -7,19 +7,12 @@
     <style>
         body {
             margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             height: 100vh;
+            background-color: #f0f0f0;
             overflow: hidden;
-            background: radial-gradient(circle, #4b0082, #8a2be2);
-        }
-
-        canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
         }
 
         #game-container {
@@ -28,7 +21,8 @@
             max-width: 800px;
             height: 100%;
             max-height: 450px;
-            margin: auto;
+            background-color: white;
+            border: 2px solid #000;
             box-sizing: border-box;
         }
 
@@ -36,28 +30,29 @@
             position: absolute;
             width: 50px;
             height: 50px;
-            background: url('maybay.png') no-repeat center center / contain;
+            background-color: red;
             top: calc(50% - 25px);
             left: calc(50% - 25px);
         }
 
         #joystick-container {
-            display: none;
             position: absolute;
             bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
             width: 150px;
             height: 150px;
-            background: rgba(0, 0, 0, 0.1);
+            background-color: rgba(0, 0, 0, 0.1);
             border-radius: 50%;
+            display: none;
+            touch-action: none;
         }
 
         #joystick {
             position: absolute;
             width: 50px;
             height: 50px;
-            background: gray;
+            background-color: gray;
             border-radius: 50%;
             left: 50%;
             top: 50%;
@@ -66,153 +61,91 @@
 
         @media (hover: none) and (pointer: coarse) {
             #joystick-container {
-                display: block !important;
+                display: block;
             }
         }
     </style>
 </head>
 <body>
-    <canvas id="stars"></canvas>
     <div id="game-container">
         <div id="square"></div>
-    </div>
-    <div id="joystick-container">
-        <div id="joystick"></div>
+        <div id="joystick-container">
+            <div id="joystick"></div>
+        </div>
     </div>
     <script>
-        const canvas = document.getElementById("stars");
-        const ctx = canvas.getContext("2d");
-        const stars = [];
-        const maxStars = 100;
+        const square = document.getElementById('square');
+        const gameContainer = document.getElementById('game-container');
+        const joystickContainer = document.getElementById('joystick-container');
+        const joystick = document.getElementById('joystick');
+        const squareSpeed = 5;
+        const keys = { w: false, a: false, s: false, d: false };
+        let squarePos = { x: gameContainer.clientWidth / 2 - square.offsetWidth / 2, y: gameContainer.clientHeight / 2 - square.offsetHeight / 2 };
+        let joystickActive = false;
+        let joystickStart = { x: 0, y: 0 };
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-
-        resizeCanvas();
-        window.addEventListener("resize", resizeCanvas);
-
-        // Tạo ngôi sao
-        function createStar() {
-            return {
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                radius: Math.random() * 3 + 1,
-                speed: Math.random() * 0.5 + 0.2,
-                opacity: Math.random() * 0.5 + 0.5,
-                glowIntensity: Math.random() * 3 + 2,
-            };
-        }
-
-        for (let i = 0; i < maxStars; i++) {
-            stars.push(createStar());
-        }
-
-        function drawStars() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            stars.forEach((star) => {
-                const gradient = ctx.createRadialGradient(
-                    star.x, star.y, 0,
-                    star.x, star.y, star.radius * star.glowIntensity
-                );
-                gradient.addColorStop(0, `rgba(255, 255, 255, ${star.opacity})`);
-                gradient.addColorStop(0.4, `rgba(255, 255, 255, ${star.opacity / 2})`);
-                gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
-
-                // Vẽ phát sáng trung tâm
-                ctx.beginPath();
-                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-                ctx.fillStyle = gradient;
-                ctx.fill();
-
-                // Hiệu ứng tỏa sáng ổn định
-                ctx.save();
-                ctx.translate(star.x, star.y);
-                ctx.strokeStyle = `rgba(255, 255, 255, ${star.opacity / 3})`;
-                ctx.lineWidth = star.radius / 3;
-                for (let i = 0; i < 4; i++) {
-                    ctx.beginPath();
-                    ctx.moveTo(0, 0);
-                    ctx.lineTo(0, star.radius * star.glowIntensity * 1.5);
-                    ctx.stroke();
-                    ctx.rotate(Math.PI / 2);
-                }
-                ctx.restore();
-            });
-        }
-
-        function updateStars() {
-            stars.forEach((star) => {
-                star.y += star.speed;
-                if (star.y > canvas.height) {
-                    Object.assign(star, createStar(), { y: 0 });
-                }
-            });
-        }
-
-        function animateStars() {
-            updateStars();
-            drawStars();
-            requestAnimationFrame(animateStars);
-        }
-
-        animateStars();
-    </script>
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const joystickContainer = document.getElementById("joystick-container");
-            const joystick = document.getElementById("joystick");
-            const square = document.getElementById("square");
-            const squareSpeed = 5;
-            let squarePos = { x: 0, y: 0 };
-            let joystickActive = false;
-            let joystickStart = { x: 0, y: 0 };
-
-            function updateSquarePosition(dx, dy) {
-                const gameContainer = document.getElementById("game-container");
-                squarePos.x += dx * squareSpeed;
-                squarePos.y += dy * squareSpeed;
-                squarePos.x = Math.max(0, Math.min(gameContainer.clientWidth - square.offsetWidth, squarePos.x));
-                squarePos.y = Math.max(0, Math.min(gameContainer.clientHeight - square.offsetHeight, squarePos.y));
-                square.style.left = `${squarePos.x}px`;
-                square.style.top = `${squarePos.y}px`;
+        function updateSquare() {
+            let dx = 0, dy = 0;
+            if (keys.w && !keys.s) dy -= 1;
+            if (keys.s && !keys.w) dy += 1;
+            if (keys.a && !keys.d) dx -= 1;
+            if (keys.d && !keys.a) dx += 1;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            if (length > 0) {
+                dx /= length;
+                dy /= length;
             }
+            squarePos.x += dx * squareSpeed;
+            squarePos.y += dy * squareSpeed;
+            squarePos.x = Math.max(0, Math.min(gameContainer.clientWidth - square.offsetWidth, squarePos.x));
+            squarePos.y = Math.max(0, Math.min(gameContainer.clientHeight - square.offsetHeight, squarePos.y));
+            square.style.left = `${squarePos.x}px`;
+            square.style.top = `${squarePos.y}px`;
+        }
 
-            joystickContainer.addEventListener("touchstart", (e) => {
-                joystickActive = true;
-                joystickStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-                joystick.style.transition = "none";
-            });
+        setInterval(updateSquare, 16);
 
-            joystickContainer.addEventListener("touchmove", (e) => {
-                if (!joystickActive) return;
+        document.addEventListener('keydown', (e) => {
+            if (keys[e.key.toLowerCase()] !== undefined) keys[e.key.toLowerCase()] = true;
+        });
 
-                const rect = joystickContainer.getBoundingClientRect();
-                const dx = e.touches[0].clientX - rect.left - rect.width / 2;
-                const dy = e.touches[0].clientY - rect.top - rect.height / 2;
+        document.addEventListener('keyup', (e) => {
+            if (keys[e.key.toLowerCase()] !== undefined) keys[e.key.toLowerCase()] = false;
+        });
 
-                const distance = Math.min(Math.sqrt(dx * dx + dy * dy), rect.width / 2 - joystick.offsetWidth / 2);
-                const angle = Math.atan2(dy, dx);
-                const offsetX = Math.cos(angle) * distance;
-                const offsetY = Math.sin(angle) * distance;
+        joystickContainer.addEventListener('touchstart', (e) => {
+            joystickActive = true;
+            joystickStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+            joystick.style.transition = 'none';
+        });
 
-                joystick.style.left = `${offsetX + rect.width / 2 - joystick.offsetWidth / 2}px`;
-                joystick.style.top = `${offsetY + rect.height / 2 - joystick.offsetWidth / 2}px`;
+        joystickContainer.addEventListener('touchmove', (e) => {
+            if (!joystickActive) return;
+            const rect = joystickContainer.getBoundingClientRect();
+            const dx = e.touches[0].clientX - joystickStart.x;
+            const dy = e.touches[0].clientY - joystickStart.y;
+            const distance = Math.min(Math.sqrt(dx * dx + dy * dy), rect.width / 2 - joystick.offsetWidth / 2);
+            const angle = Math.atan2(dy, dx);
+            const offsetX = Math.cos(angle) * distance;
+            const offsetY = Math.sin(angle) * distance;
+            joystick.style.left = `${offsetX + rect.width / 2 - joystick.offsetWidth / 2}px`;
+            joystick.style.top = `${offsetY + rect.height / 2 - joystick.offsetHeight / 2}px`;
 
-                const normalizedDX = offsetX / distance || 0;
-                const normalizedDY = offsetY / distance || 0;
+            const normalizedDX = offsetX / distance || 0;
+            const normalizedDY = offsetY / distance || 0;
+            squarePos.x += normalizedDX * squareSpeed;
+            squarePos.y += normalizedDY * squareSpeed;
+            squarePos.x = Math.max(0, Math.min(gameContainer.clientWidth - square.offsetWidth, squarePos.x));
+            squarePos.y = Math.max(0, Math.min(gameContainer.clientHeight - square.offsetHeight, squarePos.y));
+            square.style.left = `${squarePos.x}px`;
+            square.style.top = `${squarePos.y}px`;
+        });
 
-                updateSquarePosition(normalizedDX, normalizedDY);
-            });
-
-            joystickContainer.addEventListener("touchend", () => {
-                joystickActive = false;
-                joystick.style.transition = "left 0.1s, top 0.1s";
-                joystick.style.left = "50%";
-                joystick.style.top = "50%";
-            });
+        joystickContainer.addEventListener('touchend', () => {
+            joystickActive = false;
+            joystick.style.left = '50%';
+            joystick.style.top = '50%';
+            joystick.style.transform = 'translate(-50%, -50%)';
         });
     </script>
 </body>
