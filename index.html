@@ -11,18 +11,30 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background: radial-gradient(circle, #4b0082, #8a2be2);
             overflow: hidden;
+            background: radial-gradient(circle, #000428, #004e92, #1a2a6c);
         }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
         #game-container {
             position: relative;
             width: 100%;
             max-width: 800px;
             height: 100%;
             max-height: 450px;
-            background-color: white;
+            background-color: rgba(255, 255, 255, 0.9);
             border: 2px solid #000;
+            z-index: 1;
         }
+
         #square {
             position: absolute;
             width: 50px;
@@ -32,6 +44,7 @@
             left: 50%;
             transform: translate(-50%, -50%);
         }
+
         #joystick-container {
             position: absolute;
             bottom: 10px;
@@ -46,6 +59,7 @@
             align-items: center;
             touch-action: none;
         }
+
         #joystick {
             width: 50px;
             height: 50px;
@@ -56,12 +70,82 @@
     </style>
 </head>
 <body>
+    <canvas id="stars"></canvas>
     <div id="game-container">
         <div id="square"></div>
         <div id="joystick-container">
             <div id="joystick"></div>
         </div>
     </div>
+    <script>
+        const canvas = document.getElementById("stars");
+        const ctx = canvas.getContext("2d");
+        const stars = [];
+        const maxStars = 150;
+
+        // Resize canvas
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        resizeCanvas();
+        window.addEventListener("resize", resizeCanvas);
+
+        // Create stars
+        function createStar() {
+            return {
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 2 + 1,
+                speed: Math.random() * 0.5 + 0.2,
+                opacity: Math.random() * 0.5 + 0.5,
+            };
+        }
+
+        for (let i = 0; i < maxStars; i++) {
+            stars.push(createStar());
+        }
+
+        function drawStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            stars.forEach((star) => {
+                const gradient = ctx.createRadialGradient(
+                    star.x,
+                    star.y,
+                    0,
+                    star.x,
+                    star.y,
+                    star.radius
+                );
+                gradient.addColorStop(0, `rgba(255, 255, 255, ${star.opacity})`);
+                gradient.addColorStop(0.5, `rgba(255, 255, 255, ${star.opacity / 2})`);
+                gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+            });
+        }
+
+        function updateStars() {
+            stars.forEach((star) => {
+                star.y += star.speed;
+                if (star.y > canvas.height) {
+                    star.y = 0;
+                    star.x = Math.random() * canvas.width;
+                }
+            });
+        }
+
+        function animateStars() {
+            updateStars();
+            drawStars();
+            requestAnimationFrame(animateStars);
+        }
+
+        animateStars();
+    </script>
     <script>
         const square = document.getElementById('square');
         const gameContainer = document.getElementById('game-container');
