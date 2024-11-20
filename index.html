@@ -26,16 +26,13 @@
         }
 
         #game-container {
-            position: relative;
             width: 100%;
             height: 100%;
-            max-width: 100vw;
-            max-height: 100vh;
+            position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            aspect-ratio: 16 / 9; /* Default for desktop */
-            background-color: rgba(255, 255, 255, 0.1);
+            aspect-ratio: 16 / 9;
         }
 
         #square {
@@ -50,7 +47,7 @@
 
         #joystick-container {
             position: absolute;
-            bottom: 10px;
+            bottom: 10%;
             left: 50%;
             transform: translateX(-50%);
             width: 150px;
@@ -69,12 +66,7 @@
             background-color: gray;
             border-radius: 50%;
             position: relative;
-        }
-
-        @media (orientation: portrait) {
-            #game-container {
-                aspect-ratio: 9 / 19.5; /* For mobile */
-            }
+            transition: left 0.1s, top 0.1s;
         }
     </style>
 </head>
@@ -91,6 +83,8 @@
         const ctx = canvas.getContext("2d");
         const stars = [];
         const glowingStars = [];
+        const maxSmallStars = Math.random() * 150 + 100;
+        const maxGlowingStars = Math.random() * 20 + 10;
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
@@ -100,6 +94,7 @@
         resizeCanvas();
         window.addEventListener("resize", resizeCanvas);
 
+        // Create small stars
         function createStar() {
             return {
                 x: Math.random() * canvas.width,
@@ -110,27 +105,39 @@
             };
         }
 
+        // Create glowing stars
         function createGlowingStar() {
             return {
                 x: Math.random() * canvas.width,
                 y: Math.random() * canvas.height,
-                radius: Math.random() * 3 + 2,
+                radius: Math.random() * 4 + 3,
                 opacity: Math.random() * 0.5 + 0.5,
             };
         }
 
-        for (let i = 0; i < 200; i++) {
+        for (let i = 0; i < maxSmallStars; i++) {
             stars.push(createStar());
         }
 
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < maxGlowingStars; i++) {
             glowingStars.push(createGlowingStar());
         }
 
         function drawBackground() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw stars
+            // Draw glow beam
+            const gradient = ctx.createLinearGradient(canvas.width, 0, 0, canvas.height);
+            gradient.addColorStop(0, "rgba(255, 255, 255, 0)");
+            gradient.addColorStop(0.3, "rgba(255, 255, 255, 0.1)");
+            gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.3)");
+            gradient.addColorStop(0.7, "rgba(255, 255, 255, 0.1)");
+            gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+            ctx.fillStyle = gradient;
+            ctx.globalCompositeOperation = "lighter";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw small stars
             stars.forEach((star) => {
                 ctx.beginPath();
                 ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
@@ -171,7 +178,7 @@
 
         animateBackground();
 
-        // Joystick setup
+        // Joystick Setup
         const square = document.getElementById("square");
         const joystickContainer = document.getElementById("joystick-container");
         const joystick = document.getElementById("joystick");
@@ -185,7 +192,6 @@
             joystickStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
             joystick.style.transition = "none";
 
-            // Move joystick center to touch position
             const rect = joystickContainer.getBoundingClientRect();
             joystick.style.left = `${e.touches[0].clientX - rect.left - 25}px`;
             joystick.style.top = `${e.touches[0].clientY - rect.top - 25}px`;
