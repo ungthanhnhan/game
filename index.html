@@ -81,6 +81,10 @@
     <script>
         const canvas = document.getElementById("background");
         const ctx = canvas.getContext("2d");
+        const stars = [];
+        const glowingStars = [];
+        const maxSmallStars = Math.random() * 150 + 100;
+        const maxGlowingStars = Math.random() * 20 + 10;
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
@@ -89,6 +93,90 @@
 
         resizeCanvas();
         window.addEventListener("resize", resizeCanvas);
+
+        // Create small stars
+        function createStar() {
+            return {
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 2 + 1,
+                speed: Math.random() * 0.5 + 0.2,
+                opacity: Math.random() * 0.5 + 0.5,
+            };
+        }
+
+        // Create glowing stars
+        function createGlowingStar() {
+            return {
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 4 + 3,
+                opacity: Math.random() * 0.5 + 0.5,
+            };
+        }
+
+        for (let i = 0; i < maxSmallStars; i++) {
+            stars.push(createStar());
+        }
+
+        for (let i = 0; i < maxGlowingStars; i++) {
+            glowingStars.push(createGlowingStar());
+        }
+
+        function drawBackground() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw glow beam
+            const gradient = ctx.createLinearGradient(canvas.width, 0, 0, canvas.height);
+            gradient.addColorStop(0, "rgba(255, 255, 255, 0)");
+            gradient.addColorStop(0.3, "rgba(255, 255, 255, 0.1)");
+            gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.3)");
+            gradient.addColorStop(0.7, "rgba(255, 255, 255, 0.1)");
+            gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+            ctx.fillStyle = gradient;
+            ctx.globalCompositeOperation = "lighter";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw small stars
+            stars.forEach((star) => {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+                ctx.fill();
+                star.y += star.speed;
+                if (star.y > canvas.height) {
+                    star.y = 0;
+                    star.x = Math.random() * canvas.width;
+                }
+            });
+
+            // Draw glowing stars
+            glowingStars.forEach((star) => {
+                const gradient = ctx.createRadialGradient(
+                    star.x,
+                    star.y,
+                    0,
+                    star.x,
+                    star.y,
+                    star.radius * 4
+                );
+                gradient.addColorStop(0, `rgba(255, 255, 255, ${star.opacity})`);
+                gradient.addColorStop(0.5, `rgba(255, 255, 255, ${star.opacity / 2})`);
+                gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+            });
+        }
+
+        function animateBackground() {
+            drawBackground();
+            requestAnimationFrame(animateBackground);
+        }
+
+        animateBackground();
 
         // Joystick Setup
         const joystickContainer = document.getElementById("joystick-container");
@@ -103,7 +191,6 @@
             const rect = joystickContainer.getBoundingClientRect();
             joystickStart = { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
 
-            // Center joystick circle to the touch position
             joystick.style.left = `${joystickStart.x - joystick.offsetWidth / 2}px`;
             joystick.style.top = `${joystickStart.y - joystick.offsetHeight / 2}px`;
         });
