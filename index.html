@@ -65,16 +65,13 @@
     <div id="joystick-container">
         <div id="joystick"></div>
     </div>
+
     <script>
         const canvas = document.getElementById("background");
         const ctx = canvas.getContext("2d");
         const stars = [];
-        const planets = [
-            { x: 200, y: 300, radius: 60, color: "#FF5733" },
-            { x: 600, y: 100, radius: 80, color: "#FFC300" },
-            { x: 900, y: 400, radius: 50, color: "#DAF7A6" }
-        ];
 
+        // Resize canvas
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -83,6 +80,7 @@
         resizeCanvas();
         window.addEventListener("resize", resizeCanvas);
 
+        // Create stars
         function createStar() {
             return {
                 x: Math.random() * canvas.width,
@@ -97,18 +95,23 @@
             stars.push(createStar());
         }
 
+        // Draw stars
         function drawBackground() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw Milky Way
-            const gradient = ctx.createLinearGradient(0, canvas.height / 4, canvas.width, canvas.height / 1.5);
+            // Gradient effect (brightness)
+            const gradient = ctx.createRadialGradient(
+                canvas.width / 2, canvas.height / 2, 100,
+                canvas.width / 2, canvas.height / 2, 500
+            );
             gradient.addColorStop(0, "rgba(255, 255, 255, 0.1)");
             gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.4)");
             gradient.addColorStop(1, "rgba(255, 255, 255, 0.1)");
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, canvas.height / 4, canvas.width, canvas.height / 2);
 
-            // Draw Stars
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw stars with updated opacity
             stars.forEach((star) => {
                 ctx.beginPath();
                 ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
@@ -120,14 +123,6 @@
                     star.x = Math.random() * canvas.width;
                 }
             });
-
-            // Draw Planets
-            planets.forEach((planet) => {
-                ctx.beginPath();
-                ctx.arc(planet.x, planet.y, planet.radius, 0, Math.PI * 2);
-                ctx.fillStyle = planet.color;
-                ctx.fill();
-            });
         }
 
         function animateBackground() {
@@ -137,6 +132,7 @@
 
         animateBackground();
 
+        // Joystick control
         const square = document.getElementById("square");
         const joystickContainer = document.getElementById("joystick-container");
         const joystick = document.getElementById("joystick");
