@@ -47,9 +47,9 @@
 
         #joystick-container {
             position: absolute;
-            top: 50%;
+            bottom: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, 50%);
             width: 150px;
             height: 150px;
             background: rgba(0, 0, 0, 0.1);
@@ -65,7 +65,7 @@
             height: 50px;
             background-color: gray;
             border-radius: 50%;
-            position: relative;
+            position: absolute;
             transition: left 0.1s, top 0.1s;
         }
     </style>
@@ -84,7 +84,7 @@
         const stars = [];
         const glowingStars = [];
         const maxSmallStars = Math.random() * 150 + 100;
-        const maxGlowingStars = Math.random() * 20 + 10;
+        const maxGlowingStars = Math.random() * 10 + 5;
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
@@ -110,7 +110,7 @@
             return {
                 x: Math.random() * canvas.width,
                 y: Math.random() * canvas.height,
-                radius: Math.random() * 4 + 3,
+                radius: Math.random() * 5 + 3,
                 opacity: Math.random() * 0.5 + 0.5,
             };
         }
@@ -125,17 +125,6 @@
 
         function drawBackground() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Draw glow beam
-            const gradient = ctx.createLinearGradient(canvas.width, 0, 0, canvas.height);
-            gradient.addColorStop(0, "rgba(255, 255, 255, 0)");
-            gradient.addColorStop(0.3, "rgba(255, 255, 255, 0.1)");
-            gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.3)");
-            gradient.addColorStop(0.7, "rgba(255, 255, 255, 0.1)");
-            gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
-            ctx.fillStyle = gradient;
-            ctx.globalCompositeOperation = "lighter";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             // Draw small stars
             stars.forEach((star) => {
@@ -168,6 +157,20 @@
                 ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
                 ctx.fillStyle = gradient;
                 ctx.fill();
+
+                // Add glowing rays
+                ctx.save();
+                ctx.translate(star.x, star.y);
+                ctx.strokeStyle = `rgba(255, 255, 255, ${star.opacity / 3})`;
+                ctx.lineWidth = star.radius / 3;
+                for (let i = 0; i < 8; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(0, star.radius * 4);
+                    ctx.stroke();
+                    ctx.rotate(Math.PI / 4);
+                }
+                ctx.restore();
             });
         }
 
