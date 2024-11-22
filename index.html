@@ -47,17 +47,17 @@
 
         #joystick-container {
             position: absolute;
-            bottom: 50%;
+            bottom: 20%;
             left: 50%;
-            transform: translate(-50%, 50%);
+            transform: translate(-50%, 0%);
             width: 150px;
             height: 150px;
-            background: rgba(0, 0, 0, 0.1);
+            background: rgba(0, 0, 0, 0.2);
             border-radius: 50%;
+            touch-action: none;
             display: flex;
             justify-content: center;
             align-items: center;
-            touch-action: none;
         }
 
         #joystick {
@@ -66,7 +66,7 @@
             background-color: gray;
             border-radius: 50%;
             position: absolute;
-            transition: left 0.1s, top 0.1s;
+            transition: transform 0.1s;
         }
     </style>
 </head>
@@ -81,6 +81,7 @@
     <script>
         const canvas = document.getElementById("background");
         const ctx = canvas.getContext("2d");
+
         const stars = [];
         const glowingStars = [];
         const maxSmallStars = Math.random() * 150 + 100;
@@ -127,16 +128,6 @@
         function drawBackground() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw light beam
-            const gradient = ctx.createLinearGradient(canvas.width, 0, 0, canvas.height);
-            gradient.addColorStop(0, "rgba(255, 255, 255, 0)");
-            gradient.addColorStop(0.3, "rgba(255, 255, 255, 0.1)");
-            gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.3)");
-            gradient.addColorStop(0.7, "rgba(255, 255, 255, 0.1)");
-            gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
             // Draw small stars
             stars.forEach((star) => {
                 ctx.beginPath();
@@ -169,16 +160,17 @@
                 ctx.fillStyle = gradient;
                 ctx.fill();
 
+                // Add glowing rays
                 ctx.save();
                 ctx.translate(star.x, star.y);
                 ctx.strokeStyle = `rgba(255, 255, 255, ${star.opacity / 3})`;
                 ctx.lineWidth = star.radius / 3;
-                for (let i = 0; i < 8; i++) {
+                for (let i = 0; i < 12; i++) {
                     ctx.beginPath();
                     ctx.moveTo(0, 0);
-                    ctx.lineTo(0, star.radius * 4);
+                    ctx.lineTo(0, star.radius * 5);
                     ctx.stroke();
-                    ctx.rotate(Math.PI / 4);
+                    ctx.rotate(Math.PI / 6);
                 }
                 ctx.restore();
 
@@ -197,7 +189,7 @@
 
         animateBackground();
 
-        // Joystick setup
+        // Joystick Setup
         const joystickContainer = document.getElementById("joystick-container");
         const joystick = document.getElementById("joystick");
         const square = document.getElementById("square");
