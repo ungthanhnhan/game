@@ -66,7 +66,7 @@
             background-color: gray;
             border-radius: 50%;
             position: absolute;
-            transition: left 0.1s, top 0.1s;
+            transition: none;
         }
     </style>
 </head>
@@ -137,16 +137,18 @@
         const joystick = document.getElementById("joystick");
         const square = document.getElementById("square");
         let joystickActive = false;
-        let joystickStart = { x: 0, y: 0 };
         let squarePos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
         joystickContainer.addEventListener("touchstart", (e) => {
             joystickActive = true;
-            const rect = joystickContainer.getBoundingClientRect();
-            joystickStart = { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+            joystick.style.transition = "none";
 
-            joystick.style.left = `${joystickStart.x - joystick.offsetWidth / 2}px`;
-            joystick.style.top = `${joystickStart.y - joystick.offsetHeight / 2}px`;
+            const rect = joystickContainer.getBoundingClientRect();
+            const touchX = e.touches[0].clientX - rect.left;
+            const touchY = e.touches[0].clientY - rect.top;
+
+            joystick.style.left = `${Math.min(Math.max(touchX - joystick.offsetWidth / 2, 0), rect.width - joystick.offsetWidth)}px`;
+            joystick.style.top = `${Math.min(Math.max(touchY - joystick.offsetHeight / 2, 0), rect.height - joystick.offsetHeight)}px`;
         });
 
         joystickContainer.addEventListener("touchmove", (e) => {
@@ -156,16 +158,16 @@
             const touchX = e.touches[0].clientX - rect.left;
             const touchY = e.touches[0].clientY - rect.top;
 
-            const dx = touchX - 75;
-            const dy = touchY - 75;
-            const distance = Math.min(Math.sqrt(dx * dx + dy * dy), 75);
+            const dx = touchX - rect.width / 2;
+            const dy = touchY - rect.height / 2;
+            const distance = Math.min(Math.sqrt(dx * dx + dy * dy), rect.width / 2);
             const angle = Math.atan2(dy, dx);
 
             const offsetX = Math.cos(angle) * distance;
             const offsetY = Math.sin(angle) * distance;
 
-            joystick.style.left = `${75 + offsetX - joystick.offsetWidth / 2}px`;
-            joystick.style.top = `${75 + offsetY - joystick.offsetHeight / 2}px`;
+            joystick.style.left = `${rect.width / 2 + offsetX - joystick.offsetWidth / 2}px`;
+            joystick.style.top = `${rect.height / 2 + offsetY - joystick.offsetHeight / 2}px`;
 
             squarePos.x = Math.max(0, Math.min(window.innerWidth - square.offsetWidth, squarePos.x + offsetX / 10));
             squarePos.y = Math.max(0, Math.min(window.innerHeight - square.offsetHeight, squarePos.y + offsetY / 10));
