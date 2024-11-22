@@ -1,58 +1,230 @@
-<script>
-    const joystickContainer = document.getElementById("joystick-container");
-    const joystick = document.getElementById("joystick");
-    const square = document.getElementById("square");
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Game</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            background: radial-gradient(circle, #0d0330, #240049, #3d006c, #1a0061);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
 
-    let joystickActive = false;
-    let squarePos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
 
-    // Bắt đầu điều khiển joystick
-    joystickContainer.addEventListener("touchstart", (e) => {
-        joystickActive = true;
-        const rect = joystickContainer.getBoundingClientRect();
-        const touchX = e.touches[0].clientX - rect.left;
-        const touchY = e.touches[0].clientY - rect.top;
+        #game-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            aspect-ratio: 16 / 9;
+        }
 
-        joystick.style.transition = "none"; // Ngắt hiệu ứng trả về để theo tay nhanh hơn
-        joystick.style.left = `${Math.min(Math.max(touchX - joystick.offsetWidth / 2, 0), rect.width - joystick.offsetWidth)}px`;
-        joystick.style.top = `${Math.min(Math.max(touchY - joystick.offsetHeight / 2, 0), rect.height - joystick.offsetHeight)}px`;
-    });
+        #square {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: url('maybay.png') no-repeat center center / contain;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
 
-    // Di chuyển joystick theo tay người dùng
-    joystickContainer.addEventListener("touchmove", (e) => {
-        if (!joystickActive) return;
+        #joystick-container {
+            position: absolute;
+            bottom: 20%;
+            left: 50%;
+            transform: translate(-50%, 0%);
+            width: 150px;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+            touch-action: none;
+            display: none; /* Hidden on desktop */
+        }
 
-        const rect = joystickContainer.getBoundingClientRect();
-        const touchX = e.touches[0].clientX - rect.left;
-        const touchY = e.touches[0].clientY - rect.top;
+        #joystick {
+            width: 50px;
+            height: 50px;
+            background-color: gray;
+            border-radius: 50%;
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="background"></canvas>
+    <div id="game-container">
+        <div id="square"></div>
+        <div id="joystick-container">
+            <div id="joystick"></div>
+        </div>
+    </div>
+    <script>
+        const canvas = document.getElementById("background");
+        const ctx = canvas.getContext("2d");
 
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
+        const stars = [];
+        const maxSmallStars = Math.random() * 150 + 100;
 
-        const dx = touchX - centerX;
-        const dy = touchY - centerY;
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
 
-        const distance = Math.min(Math.sqrt(dx * dx + dy * dy), rect.width / 2 - joystick.offsetWidth / 2);
-        const angle = Math.atan2(dy, dx);
+        resizeCanvas();
+        window.addEventListener("resize", resizeCanvas);
 
-        const offsetX = Math.cos(angle) * distance;
-        const offsetY = Math.sin(angle) * distance;
+        // Create small stars
+        function createStar() {
+            return {
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 2 + 1,
+                speed: Math.random() * 0.5 + 0.2,
+                opacity: Math.random() * 0.5 + 0.5,
+            };
+        }
 
-        joystick.style.left = `${centerX + offsetX - joystick.offsetWidth / 2}px`;
-        joystick.style.top = `${centerY + offsetY - joystick.offsetHeight / 2}px`;
+        for (let i = 0; i < maxSmallStars; i++) {
+            stars.push(createStar());
+        }
 
-        // Di chuyển vật thể
-        squarePos.x = Math.max(0, Math.min(window.innerWidth - square.offsetWidth, squarePos.x + offsetX / 10));
-        squarePos.y = Math.max(0, Math.min(window.innerHeight - square.offsetHeight, squarePos.y + offsetY / 10));
-        square.style.left = `${squarePos.x}px`;
-        square.style.top = `${squarePos.y}px`;
-    });
+        function drawBackground() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Trả joystick về vị trí trung tâm
-    joystickContainer.addEventListener("touchend", () => {
-        joystickActive = false;
-        joystick.style.transition = "left 0.2s, top 0.2s"; // Hiệu ứng trả về tâm
-        joystick.style.left = "50%";
-        joystick.style.top = "50%";
-    });
-</script>
+            // Draw light beam
+            const gradient = ctx.createLinearGradient(canvas.width, 0, 0, canvas.height);
+            gradient.addColorStop(0, "rgba(255, 255, 255, 0)");
+            gradient.addColorStop(0.3, "rgba(255, 255, 255, 0.1)");
+            gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.3)");
+            gradient.addColorStop(0.7, "rgba(255, 255, 255, 0.1)");
+            gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw small stars
+            stars.forEach((star) => {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity})`;
+                ctx.fill();
+                star.y += star.speed;
+                if (star.y > canvas.height) {
+                    star.y = 0;
+                    star.x = Math.random() * canvas.width;
+                }
+            });
+        }
+
+        function animateBackground() {
+            drawBackground();
+            requestAnimationFrame(animateBackground);
+        }
+
+        animateBackground();
+
+        // Detect if the user is on a touchscreen device
+        const isTouchDevice = "ontouchstart" in document.documentElement;
+
+        if (isTouchDevice) {
+            // Show joystick for touchscreen devices
+            const joystickContainer = document.getElementById("joystick-container");
+            joystickContainer.style.display = "block";
+
+            const joystick = document.getElementById("joystick");
+            const square = document.getElementById("square");
+            let joystickActive = false;
+            let squarePos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+            joystickContainer.addEventListener("touchstart", (e) => {
+                joystickActive = true;
+                const rect = joystickContainer.getBoundingClientRect();
+                const touchX = e.touches[0].clientX - rect.left;
+                const touchY = e.touches[0].clientY - rect.top;
+
+                joystick.style.transition = "none"; // Ngắt hiệu ứng trả về để theo tay nhanh hơn
+                joystick.style.left = `${Math.min(Math.max(touchX - joystick.offsetWidth / 2, 0), rect.width - joystick.offsetWidth)}px`;
+                joystick.style.top = `${Math.min(Math.max(touchY - joystick.offsetHeight / 2, 0), rect.height - joystick.offsetHeight)}px`;
+            });
+
+            joystickContainer.addEventListener("touchmove", (e) => {
+                if (!joystickActive) return;
+
+                const rect = joystickContainer.getBoundingClientRect();
+                const touchX = e.touches[0].clientX - rect.left;
+                const touchY = e.touches[0].clientY - rect.top;
+
+                const dx = touchX - rect.width / 2;
+                const dy = touchY - rect.height / 2;
+                const distance = Math.min(Math.sqrt(dx * dx + dy * dy), rect.width / 2);
+                const angle = Math.atan2(dy, dx);
+
+                const offsetX = Math.cos(angle) * distance;
+                const offsetY = Math.sin(angle) * distance;
+
+                joystick.style.left = `${rect.width / 2 + offsetX - joystick.offsetWidth / 2}px`;
+                joystick.style.top = `${rect.height / 2 + offsetY - joystick.offsetHeight / 2}px`;
+
+                squarePos.x = Math.max(0, Math.min(window.innerWidth - square.offsetWidth, squarePos.x + offsetX / 10));
+                squarePos.y = Math.max(0, Math.min(window.innerHeight - square.offsetHeight, squarePos.y + offsetY / 10));
+                square.style.left = `${squarePos.x}px`;
+                square.style.top = `${squarePos.y}px`;
+            });
+
+            joystickContainer.addEventListener("touchend", () => {
+                joystickActive = false;
+                joystick.style.transition = "left 0.2s, top 0.2s"; // Hiệu ứng trả về tâm
+                joystick.style.left = "50%";
+                joystick.style.top = "50%";
+            });
+        } else {
+            // Movement for desktop using W, A, S, D
+            const square = document.getElementById("square");
+            let squarePos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+            const speed = 5;
+            const keys = { w: false, a: false, s: false, d: false };
+
+            window.addEventListener("keydown", (e) => {
+                if (keys.hasOwnProperty(e.key)) keys[e.key] = true;
+            });
+
+            window.addEventListener("keyup", (e) => {
+                if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
+            });
+
+            function moveSquare() {
+                if (keys.w) squarePos.y -= speed;
+                if (keys.s) squarePos.y += speed;
+                if (keys.a) squarePos.x -= speed;
+                if (keys.d) squarePos.x += speed;
+
+                squarePos.x = Math.max(0, Math.min(window.innerWidth - square.offsetWidth, squarePos.x));
+                squarePos.y = Math.max(0, Math.min(window.innerHeight - square.offsetHeight, squarePos.y));
+
+                square.style.left = `${squarePos.x}px`;
+                square.style.top = `${squarePos.y}px`;
+
+                requestAnimationFrame(moveSquare);
+            }
+
+            moveSquare();
+        }
+    </script>
+</body>
+</html>
