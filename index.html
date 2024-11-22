@@ -66,7 +66,7 @@
             background-color: gray;
             border-radius: 50%;
             position: absolute;
-            transition: transform 0.1s;
+            transition: left 0.1s, top 0.1s;
         }
     </style>
 </head>
@@ -93,7 +93,7 @@
         resizeCanvas();
         window.addEventListener("resize", resizeCanvas);
 
-        // Create small stars
+        // Create small stars (ensuring they are circular)
         function createStar() {
             return {
                 x: Math.random() * canvas.width,
@@ -111,17 +111,7 @@
         function drawBackground() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw light beam
-            const gradient = ctx.createLinearGradient(canvas.width, 0, 0, canvas.height);
-            gradient.addColorStop(0, "rgba(255, 255, 255, 0)");
-            gradient.addColorStop(0.3, "rgba(255, 255, 255, 0.1)");
-            gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.3)");
-            gradient.addColorStop(0.7, "rgba(255, 255, 255, 0.1)");
-            gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Draw small stars
+            // Draw small stars (perfectly circular)
             stars.forEach((star) => {
                 ctx.beginPath();
                 ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
