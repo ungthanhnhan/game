@@ -46,7 +46,25 @@
         }
 
         #joystick-container {
-            display: none; /* Joystick will not appear on desktop */
+            position: absolute;
+            bottom: 20%;
+            left: 50%;
+            transform: translate(-50%, 0%);
+            width: 150px;
+            height: 150px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+            touch-action: none;
+            display: none; /* Joystick hidden by default */
+        }
+
+        #joystick {
+            width: 50px;
+            height: 50px;
+            background-color: gray;
+            border-radius: 50%;
+            position: absolute;
+            transition: left 0.1s, top 0.1s;
         }
     </style>
 </head>
@@ -54,6 +72,9 @@
     <canvas id="background"></canvas>
     <div id="game-container">
         <div id="square"></div>
+        <div id="joystick-container">
+            <div id="joystick"></div>
+        </div>
     </div>
     <script>
         const canvas = document.getElementById("background");
@@ -70,7 +91,7 @@
         resizeCanvas();
         window.addEventListener("resize", resizeCanvas);
 
-        // Create small stars (ensuring they are circular)
+        // Create small stars
         function createStar() {
             return {
                 x: Math.random() * canvas.width,
@@ -88,17 +109,7 @@
         function drawBackground() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw light beam
-            const gradient = ctx.createLinearGradient(canvas.width, 0, 0, canvas.height);
-            gradient.addColorStop(0, "rgba(255, 255, 255, 0)");
-            gradient.addColorStop(0.3, "rgba(255, 255, 255, 0.1)");
-            gradient.addColorStop(0.5, "rgba(255, 255, 255, 0.3)");
-            gradient.addColorStop(0.7, "rgba(255, 255, 255, 0.1)");
-            gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Draw small stars (perfectly circular)
+            // Draw small stars
             stars.forEach((star) => {
                 ctx.beginPath();
                 ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
@@ -119,37 +130,91 @@
 
         animateBackground();
 
-        // Movement for desktop
-        const square = document.getElementById("square");
-        let squarePos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
-        const speed = 5;
-        const keys = { w: false, a: false, s: false, d: false };
+        // Detect if the user is on a touchscreen device
+        const isTouchDevice = "ontouchstart" in document.documentElement;
 
-        window.addEventListener("keydown", (e) => {
-            if (keys.hasOwnProperty(e.key)) keys[e.key] = true;
-        });
+        if (isTouchDevice) {
+            // Show joystick for touchscreen devices
+            const joystickContainer = document.getElementById("joystick-container");
+            joystickContainer.style.display = "block";
 
-        window.addEventListener("keyup", (e) => {
-            if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
-        });
+            const joystick = document.getElementById("joystick");
+            const square = document.getElementById("square");
+            let joystickActive = false;
+            let squarePos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
-        function moveSquare() {
-            if (keys.w) squarePos.y -= speed;
-            if (keys.s) squarePos.y += speed;
-            if (keys.a) squarePos.x -= speed;
-            if (keys.d) squarePos.x += speed;
+            joystickContainer.addEventListener("touchstart", (e) => {
+                joystickActive = true;
+                const rect = joystickContainer.getBoundingClientRect();
+                const touchX = e.touches[0].clientX - rect.left;
+                const touchY = e.touches[0].clientY - rect.top;
 
-            // Keep the square inside the container
-            squarePos.x = Math.max(0, Math.min(window.innerWidth - square.offsetWidth, squarePos.x));
-            squarePos.y = Math.max(0, Math.min(window.innerHeight - square.offsetHeight, squarePos.y));
+                joystick.style.left = `${Math.min(Math.max(touchX - joystick.offsetWidth / 2, 0), rect.width - joystick.offsetWidth)}px`;
+                joystick.style.top = `${Math.min(Math.max(touchY - joystick.offsetHeight / 2, 0), rect.height - joystick.offsetHeight)}px`;
+            });
 
-            square.style.left = `${squarePos.x}px`;
-            square.style.top = `${squarePos.y}px`;
+            joystickContainer.addEventListener("touchmove", (e) => {
+                if (!joystickActive) return;
 
-            requestAnimationFrame(moveSquare);
+                const rect = joystickContainer.getBoundingClientRect();
+                const touchX = e.touches[0].clientX - rect.left;
+                const touchY = e.touches[0].clientY - rect.top;
+
+                const dx = touchX - rect.width / 2;
+                const dy = touchY - rect.height / 2;
+                const distance = Math.min(Math.sqrt(dx * dx + dy * dy), rect.width / 2);
+                const angle = Math.atan2(dy, dx);
+
+                const offsetX = Math.cos(angle) * distance;
+                const offsetY = Math.sin(angle) * distance;
+
+                joystick.style.left = `${rect.width / 2 + offsetX - joystick.offsetWidth / 2}px`;
+                joystick.style.top = `${rect.height / 2 + offsetY - joystick.offsetHeight / 2}px`;
+
+                squarePos.x = Math.max(0, Math.min(window.innerWidth - square.offsetWidth, squarePos.x + offsetX / 10));
+                squarePos.y = Math.max(0, Math.min(window.innerHeight - square.offsetHeight, squarePos.y + offsetY / 10));
+                square.style.left = `${squarePos.x}px`;
+                square.style.top = `${squarePos.y}px`;
+            });
+
+            joystickContainer.addEventListener("touchend", () => {
+                joystickActive = false;
+                joystick.style.transition = "left 0.2s, top 0.2s";
+                joystick.style.left = "50%";
+                joystick.style.top = "50%";
+            });
+        } else {
+            // Movement for desktop using W, A, S, D
+            const square = document.getElementById("square");
+            let squarePos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+            const speed = 5;
+            const keys = { w: false, a: false, s: false, d: false };
+
+            window.addEventListener("keydown", (e) => {
+                if (keys.hasOwnProperty(e.key)) keys[e.key] = true;
+            });
+
+            window.addEventListener("keyup", (e) => {
+                if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
+            });
+
+            function moveSquare() {
+                if (keys.w) squarePos.y -= speed;
+                if (keys.s) squarePos.y += speed;
+                if (keys.a) squarePos.x -= speed;
+                if (keys.d) squarePos.x += speed;
+
+                squarePos.x = Math.max(0, Math.min(window.innerWidth - square.offsetWidth, squarePos.x));
+                squarePos.y = Math.max(0, Math.min(window.innerHeight - square.offsetHeight, squarePos.y));
+
+                square.style.left = `${squarePos.x}px`;
+                square.style.top = `${squarePos.y}px`;
+
+                requestAnimationFrame(moveSquare);
+            }
+
+            moveSquare();
         }
-
-        moveSquare();
     </script>
 </body>
 </html>
